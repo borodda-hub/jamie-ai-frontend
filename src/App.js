@@ -75,9 +75,16 @@ const JamieAI = () => {
     commitment: Math.random() * 3 + 5.8
   });
 
-  // Scroll to bottom when new messages arrive
+  // Scroll to bottom when new messages arrive (optimized)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const timeoutId = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }, 50);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages, isTyping]);
 
   // Test connection on mount
@@ -223,7 +230,7 @@ const JamieAI = () => {
   // Individual message component
   const ChatMessage = ({ message, isUser, dqScore, timestamp, isError, showDemoButton }) => {
     return (
-      <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} mb-6 fade-in`}>
+      <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} mb-6`}>
         {!isUser && (
           <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
             <Bot className="w-5 h-5 text-pink-600" />
@@ -274,7 +281,7 @@ const JamieAI = () => {
 
   // Typing indicator
   const TypingIndicator = () => (
-    <div className="flex gap-3 justify-start mb-6 fade-in">
+    <div className="flex gap-3 justify-start mb-6">
       <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
         <Bot className="w-5 h-5 text-pink-600" />
       </div>
@@ -409,7 +416,12 @@ const JamieAI = () => {
     }
   };
 
-  // Handle enter key
+  // Handle message input change (optimized to prevent flashing)
+  const handleMessageChange = (e) => {
+    setCurrentMessage(e.target.value);
+  };
+
+  // Handle enter key (optimized)
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -534,12 +546,17 @@ const JamieAI = () => {
         <div className="flex gap-3 max-w-4xl mx-auto">
           <textarea
             value={currentMessage}
-            onChange={(e) => setCurrentMessage(e.target.value)}
+            onChange={handleMessageChange}
             onKeyPress={handleKeyPress}
             placeholder="Type your coaching message to Jamie..."
-            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[46px] max-h-32"
             rows="1"
             disabled={isLoading}
+            style={{ 
+              transition: 'none',
+              height: 'auto',
+              minHeight: '46px'
+            }}
           />
           <button
             onClick={sendMessage}
