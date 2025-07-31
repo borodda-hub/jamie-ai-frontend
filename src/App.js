@@ -12,7 +12,7 @@ const JamieAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('untested');
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(false); // Start with real backend
   
   // Refs
   const messagesEndRef = useRef(null);
@@ -392,14 +392,16 @@ const JamieAI = () => {
       console.error('Detailed error sending message:', error);
       setConnectionStatus('failed');
       
-      // More detailed error message with demo option
+      // Show error message and offer demo mode
       let errorText = "I'm having trouble connecting to the backend. ";
       
-      if (error.message.includes('fetch') || error.message.includes('CORS')) {
-        errorText += "This might be a network issue. ";
+      if (error.message.includes('fetch')) {
+        errorText += "This might be a network issue or the backend may be sleeping. ";
+      } else if (error.message.includes('500')) {
+        errorText += "The backend returned an error. ";
       }
       
-      errorText += "Would you like to try the demo mode instead?";
+      errorText += "Would you like to try demo mode instead?";
       
       const errorMessage = {
         id: Date.now() + 1,
@@ -448,8 +450,19 @@ const JamieAI = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          {/* Connection Status */}
-          {!demoMode && (
+          {/* Demo mode switch */}
+          {demoMode ? (
+            <button
+              onClick={() => {
+                setDemoMode(false);
+                testConnection();
+              }}
+              className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition-colors text-sm"
+            >
+              Try Real Backend
+            </button>
+          ) : (
+            /* Connection Status */
             <div className="flex items-center gap-2 text-sm">
               <div className={`w-2 h-2 rounded-full ${
                 connectionStatus === 'connected' ? 'bg-green-500' :
@@ -503,23 +516,45 @@ const JamieAI = () => {
             
             {!demoMode && connectionStatus === 'failed' && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto mb-4">
-                <p className="text-yellow-800 text-sm mb-2">
-                  ⚠️ Can't connect to the backend. This might be a network issue.
+                <p className="text-yellow-800 text-sm mb-3">
+                  ⚠️ Can't connect to the backend. This might be because:
                 </p>
-                <button
-                  onClick={() => setDemoMode(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Try Demo Mode
-                </button>
+                <ul className="text-yellow-700 text-xs mb-3 list-disc list-inside space-y-1">
+                  <li>Backend is sleeping (Render.com free tier)</li>
+                  <li>Network connectivity issue</li>
+                  <li>Backend configuration problem</li>
+                </ul>
+                <div className="flex gap-2">
+                  <button
+                    onClick={testConnection}
+                    className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                  >
+                    Retry Connection
+                  </button>
+                  <button
+                    onClick={() => setDemoMode(true)}
+                    className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  >
+                    Use Demo Mode
+                  </button>
+                </div>
               </div>
             )}
             
             {demoMode && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto mb-4">
-                <p className="text-blue-800 text-sm">
+                <p className="text-blue-800 text-sm mb-3">
                   🎭 Demo mode active - Jamie will respond with simulated conversations and DQ scores.
                 </p>
+                <button
+                  onClick={() => {
+                    setDemoMode(false);
+                    testConnection();
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                >
+                  Try Real Backend
+                </button>
               </div>
             )}
           </div>
