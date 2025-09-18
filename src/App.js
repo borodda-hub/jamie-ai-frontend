@@ -22,7 +22,7 @@ const JamieAI = () => {
   const testConnection = async () => {
     setConnectionStatus('testing');
     try {
-      const response = await fetch('https://jamie-backend.onrender.com/chat', {
+      const response = await fetch('http://localhost:3001/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,12 +67,12 @@ const JamieAI = () => {
   };
 
   const getDemoScore = () => ({
-    framing: Math.random() * 3 + 6.5,
-    alternatives: Math.random() * 3 + 5.5,
-    information: Math.random() * 3 + 6.0,
-    values: Math.random() * 3 + 7.0,
-    reasoning: Math.random() * 3 + 6.2,
-    commitment: Math.random() * 3 + 5.8
+    framing: Math.random() * 0.3 + 0.65,
+    alternatives: Math.random() * 0.3 + 0.55,
+    information: Math.random() * 0.3 + 0.60,
+    values: Math.random() * 0.3 + 0.70,
+    reasoning: Math.random() * 0.3 + 0.62,
+    commitment: Math.random() * 0.3 + 0.58
   });
 
   // Scroll to bottom when new messages arrive (optimized)
@@ -110,13 +110,18 @@ const JamieAI = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Welcome to JamieAI</h2>
-          <p className="text-gray-600 mb-6">
-            You'll be coaching Jamie, a sophomore mechanical engineering student considering switching to art/design. 
-            Please provide some basic information to get started.
-          </p>
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl max-w-md w-full p-8 border border-gray-100">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Bot className="w-8 h-8 text-pink-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome to JamieAI</h2>
+            <p className="text-gray-600 leading-relaxed">
+              You'll be coaching Jamie, a sophomore mechanical engineering student considering switching to art/design. 
+              Please provide some basic information to get started.
+            </p>
+          </div>
           
           <div className="space-y-4">
             <div>
@@ -174,7 +179,7 @@ const JamieAI = () => {
             <button
               onClick={handleSubmit}
               disabled={!formData.name || !formData.email}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-2xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Start Coaching Session
             </button>
@@ -187,38 +192,39 @@ const JamieAI = () => {
   // Decision Quality Score visualization
   const DQScoreDisplay = ({ scores, className = "" }) => {
     const dimensions = [
-      { key: 'framing', label: 'Framing', color: 'bg-blue-500' },
-      { key: 'alternatives', label: 'Alternatives', color: 'bg-green-500' },
-      { key: 'information', label: 'Information', color: 'bg-yellow-500' },
-      { key: 'values', label: 'Values', color: 'bg-purple-500' },
-      { key: 'reasoning', label: 'Reasoning', color: 'bg-red-500' },
-      { key: 'commitment', label: 'Commitment', color: 'bg-indigo-500' }
+      { key: 'framing', label: 'Framing', color: 'bg-gradient-to-r from-blue-500 to-blue-600' },
+      { key: 'alternatives', label: 'Alternatives', color: 'bg-gradient-to-r from-emerald-500 to-emerald-600' },
+      { key: 'information', label: 'Information', color: 'bg-gradient-to-r from-amber-500 to-amber-600' },
+      { key: 'values', label: 'Values', color: 'bg-gradient-to-r from-purple-500 to-purple-600' },
+      { key: 'reasoning', label: 'Reasoning', color: 'bg-gradient-to-r from-red-500 to-red-600' },
+      { key: 'commitment', label: 'Commitment', color: 'bg-gradient-to-r from-indigo-500 to-indigo-600' }
     ];
 
     const avgScore = Object.values(scores).reduce((a, b) => a + b, 0) / 6;
 
     return (
       <div className={`${className}`}>
-        <div className="flex items-center gap-2 mb-2">
-          <Star className="w-4 h-4 text-yellow-500" />
-          <span className="text-sm font-medium text-gray-700">
-            Decision Quality Score: {avgScore.toFixed(1)}/10
-          </span>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center">
+            <Star className="w-4 h-4 text-yellow-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-800">Decision Quality Score</h3>
+            <p className="text-lg font-bold text-gray-900">{avgScore.toFixed(1)}/1.0</p>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {dimensions.map(dim => (
-            <div key={dim.key} className="flex items-center gap-2">
-              <div className="flex-1">
-                <div className="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>{dim.label}</span>
-                  <span>{scores[dim.key]?.toFixed(1)}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className={`${dim.color} h-2 rounded-full transition-all duration-300`}
-                    style={{ width: `${(scores[dim.key] / 10) * 100}%` }}
-                  />
-                </div>
+            <div key={dim.key} className="space-y-1">
+              <div className="flex justify-between text-xs font-medium text-gray-700">
+                <span>{dim.label}</span>
+                <span className="text-gray-600">{scores[dim.key]?.toFixed(1)}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 shadow-inner">
+                <div
+                  className={`${dim.color} h-2.5 rounded-full transition-all duration-500 shadow-sm`}
+                  style={{ width: `${scores[dim.key] * 100}%` }}
+                />
               </div>
             </div>
           ))}
@@ -232,19 +238,19 @@ const JamieAI = () => {
     return (
       <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} mb-6`}>
         {!isUser && (
-          <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-md">
             <Bot className="w-5 h-5 text-pink-600" />
           </div>
         )}
         
-        <div className={`max-w-[80%] ${isUser ? 'order-2' : ''}`}>
+        <div className={`max-w-[70%] ${isUser ? 'order-2' : ''}`}>
           <div
-            className={`p-4 rounded-2xl ${
+            className={`p-5 rounded-3xl shadow-sm ${
               isUser
-                ? 'bg-blue-600 text-white ml-auto'
+                ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white ml-auto shadow-blue-200/50'
                 : isError
                 ? 'bg-red-50 text-red-800 border border-red-200'
-                : 'bg-gray-100 text-gray-800'
+                : 'bg-white text-gray-800 shadow-gray-200/50 border border-gray-100'
             }`}
           >
             <p className="whitespace-pre-wrap">{message}</p>
@@ -260,7 +266,7 @@ const JamieAI = () => {
           </div>
           
           {isUser && dqScore && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+            <div className="mt-4 p-5 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl border border-gray-200/50 max-w-lg shadow-sm">
               <DQScoreDisplay scores={dqScore} />
             </div>
           )}
@@ -271,7 +277,7 @@ const JamieAI = () => {
         </div>
         
         {isUser && (
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 order-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center flex-shrink-0 order-3 shadow-md">
             <User className="w-5 h-5 text-blue-600" />
           </div>
         )}
@@ -282,14 +288,14 @@ const JamieAI = () => {
   // Typing indicator
   const TypingIndicator = () => (
     <div className="flex gap-3 justify-start mb-6">
-      <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-md">
         <Bot className="w-5 h-5 text-pink-600" />
       </div>
-      <div className="bg-gray-100 text-gray-800 p-4 rounded-2xl">
+      <div className="bg-white text-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100">
         <div className="flex gap-1">
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
         </div>
       </div>
     </div>
@@ -348,7 +354,7 @@ const JamieAI = () => {
     try {
       console.log('Sending message to API:', messageText);
       
-      const response = await fetch('https://jamie-backend.onrender.com/chat', {
+      const response = await fetch('http://localhost:3001/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -432,18 +438,18 @@ const JamieAI = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       {showUserInfoModal && <UserInfoModal />}
       
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 p-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center shadow-md">
             <Bot className="w-6 h-6 text-pink-600" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-gray-800">
-              Jamie {demoMode && <span className="text-sm text-blue-600">(Demo)</span>}
+            <h1 className="text-xl font-bold text-gray-800">
+              Jamie {demoMode && <span className="text-sm font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Demo</span>}
             </h1>
             <p className="text-sm text-gray-600">Mechanical Engineering Student</p>
           </div>
@@ -499,17 +505,18 @@ const JamieAI = () => {
       {/* Messages */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 chat-container"
+        className="flex-1 overflow-y-auto p-4 chat-container"
       >
+        <div className="max-w-4xl mx-auto space-y-4">
         {messages.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-4">
-              <Bot className="w-8 h-8 text-pink-600" />
+          <div className="text-center py-16">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Bot className="w-10 h-10 text-pink-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              Start Coaching Jamie {demoMode && <span className="text-blue-600">(Demo Mode)</span>}
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">
+              Start Coaching Jamie {demoMode && <span className="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full ml-2">Demo Mode</span>}
             </h2>
-            <p className="text-gray-600 max-w-md mx-auto mb-4">
+            <p className="text-gray-600 max-w-lg mx-auto mb-8 text-lg leading-relaxed">
               Jamie is a sophomore mechanical engineering student considering switching to art/design. 
               She's worried about disappointing her immigrant parents. How would you coach her?
             </p>
@@ -574,29 +581,30 @@ const JamieAI = () => {
         
         {isTyping && <TypingIndicator />}
         <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t border-gray-200 p-4">
-        <div className="flex gap-3 max-w-4xl mx-auto">
+      <div className="bg-white/80 backdrop-blur-sm border-t border-gray-200/50 p-6 shadow-lg">
+        <div className="flex gap-4 max-w-4xl mx-auto">
           <textarea
             value={currentMessage}
             onChange={handleMessageChange}
             onKeyPress={handleKeyPress}
             placeholder="Type your coaching message to Jamie..."
-            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[46px] max-h-32"
+            className="flex-1 p-4 border border-gray-200 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[52px] max-h-32 bg-white/90 shadow-sm transition-all duration-200"
             rows="1"
             disabled={isLoading}
             style={{ 
               transition: 'none',
               height: 'auto',
-              minHeight: '46px'
+              minHeight: '52px'
             }}
           />
           <button
             onClick={sendMessage}
             disabled={isLoading || !currentMessage.trim()}
-            className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-2xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
           >
             <Send className="w-5 h-5" />
           </button>
